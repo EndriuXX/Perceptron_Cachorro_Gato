@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Perceptron Web</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <style>
+    h2 {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .short-input {
+      width: 100px;
+    }
+
+    #result {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    #prediction {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .animal-image-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .animal-image {
+      width: 200px;
+      height: 200px;
+    }
+
+    .message {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Deixe o perceptron adivinhar se é um cachorro ou um gato!</h2>
+    <br>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="ears">Formato das orelhas (0 para pontudas, 1 para arredondadas):</label>
+          <input type="number" class="form-control short-input" id="ears" min="0" max="1">
+        </div>
+
+        <div class="form-group">
+          <label for="tail">Cauda abana sim ou não (0 para não, 1 para sim):</label>
+          <input type="number" class="form-control short-input" id="tail" min="0" max="1">
+        </div>
+        
+        <div class="form-group">
+          <label for="whiskers">Presença de bigodes (0 para sem bigodes, 1 para com bigodes):</label>
+          <input type="number" class="form-control short-input" id="whiskers" min="0" max="1">
+        </div>
+
+        <div class="form-group">
+          <label for="sound">Emissão de som (0 para silencioso, 1 para ruidoso):</label>
+          <input type="number" class="form-control short-input" id="sound" min="0" max="1">
+        </div>
+
+        <div class="text-center">
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="trainAndPredict()">Treinar e Prever</button>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary btn-clear" onclick="clearData()">Limpar Dados</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="animal-image-container">
+          <img id="animalImage" class="animal-image" src="" alt="Animal" style="display: none;">
+        </div>
+        <div id="result" style="display: none;">
+          <p id="prediction" class="message"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function Perceptron() {
+      this.weights = [0, 0, 0, 0];
+      this.bias = 0;
+    }
+
+    Perceptron.prototype.predict = function(ears, tail, whiskers, sound) {
+      var summation = ears * this.weights[0] + tail * this.weights[1] + whiskers * this.weights[2] + sound * this.weights[3] + this.bias;
+      return summation >= 0 ? 1 : 0;
+    };
+
+    Perceptron.prototype.train = function(trainingData, targets, epochs) {
+      for (var i = 0; i < epochs; i++) {
+        for (var j = 0; j < trainingData.length; j++) {
+          var inputs = trainingData[j];
+          var target = targets[j];
+          var ears = inputs[0];
+          var tail = inputs[1];
+          var whiskers = inputs[2];
+          var sound = inputs[3];
+          var prediction = this.predict(ears, tail, whiskers, sound);
+          var error = target - prediction;
+          this.weights[0] += error * ears;
+          this.weights[1] += error * tail;
+          this.weights[2] += error * whiskers;
+          this.weights[3] += error * sound;
+          this.bias += error;
+        }
+      }
+    };
+
+    var perceptron = new Perceptron();
+
+    function trainAndPredict() {
+      var trainingData = [
+        [0, 0, 0, 0],
+        [0, 1, 1, 0],
+        [1, 0, 0, 1],
+        [1, 1, 1, 1]
+      ];
+      var targets = [0, 1, 1, 0];
+      var epochs = 30;
+
+      perceptron.train(trainingData, targets, epochs);
+
+      var ears = parseInt(document.getElementById("ears").value);
+      var tail = parseInt(document.getElementById("tail").value);
+      var whiskers = parseInt(document.getElementById("whiskers").value);
+      var sound = parseInt(document.getElementById("sound").value);
+      var prediction = perceptron.predict(ears, tail, whiskers, sound);
+      var resultElement = document.getElementById("result");
+      var predictionElement = document.getElementById("prediction");
+      var animalImageElement = document.getElementById("animalImage");
+
+      if (prediction === 1) {
+        predictionElement.innerText = "É um gato!";
+        animalImageElement.src = "gato.jpg";
+      } else {
+        predictionElement.innerText = "É um cachorro!";
+        animalImageElement.src = "cachorro.jpg";
+      }
+
+      resultElement.style.display = "block";
+      animalImageElement.style.display = "block";
+    }
+
+    function clearData() {
+      document.getElementById("ears").value = "";
+      document.getElementById("tail").value = "";
+      document.getElementById("whiskers").value = "";
+      document.getElementById("sound").value = "";
+      document.getElementById("result").style.display = "none";
+      document.getElementById("animalImage").style.display = "none";
+    }
+  </script>
+</body>
+</html>
